@@ -1,0 +1,34 @@
+"""配置管理"""
+import os
+
+from pydantic import BaseModel
+from typing import Optional,Any,Dict
+
+class Config(BaseModel):
+    """HelloAgents配置类"""
+    #LLM配置
+    default_model: str = "gpt-3.5-tubo"
+    default_provider: str = "openai"
+    temperature: float = 0.7
+    max_tokens: Optional[int] = None
+
+    #系统设置
+    debug: bool = False
+    log_level: str = "INFO"
+
+    #其他配置
+    max_history_length: int = 100
+
+    @classmethod
+    def from_dev(cls) -> "Config":
+        """从环境变量创建配置"""
+        return cls(
+            debug=os.getenv("DEBUG","false").lower() == 'true',
+            log_level=os.getenv("LOG_LEVEL","INFO"),
+            temperature=float(os.getenv("TEMPERATURE","0.7")),
+            max_tokens=int(os.getenv("MAX_TOKENS") if os.getenv("MAX_TOKENS") else None)
+        )
+
+    def to_dict(self) -> Dict[str,Any]:
+        """转换为字典"""
+        return self.dict()
